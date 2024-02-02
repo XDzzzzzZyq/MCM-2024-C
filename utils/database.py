@@ -25,3 +25,16 @@ def get_velocity(P: pd.Series, I1: float, I2: float) -> [pd.Series, pd.Series]:
     w2 /= I2
 
     return w1, w2
+
+
+def get_velocity_2(P: pd.Series, I1: float, I2: float) -> [pd.Series, pd.Series]:
+    I1I2 = I1*I2
+    I1I2P = I1I2*P
+    SQRT = np.sqrt(I1I2P-I1I2P*P)
+    dom = -I1I2+I1**2*P+I1I2P
+
+    w1 = (I1*P+SQRT)/dom
+    w2 = 1-I1**2*P/dom - I1*SQRT/dom
+    w2 /= I2
+
+    return w1, w2
