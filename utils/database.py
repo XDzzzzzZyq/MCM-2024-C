@@ -38,3 +38,24 @@ def get_velocity_2(P: pd.Series, I1: float, I2: float) -> [pd.Series, pd.Series]
     w2 /= I2
 
     return w1, w2
+
+
+def _expected_P(P: pd.Series, l:float = 0.8) -> float:
+    w = len(P)
+    ker = l*np.power(1-l, np.arange(0, w))
+    ker[-1] += (1-l)**(w)
+    #print(ker)
+    #print(sum(ker))
+    return sum(P*ker)
+
+
+def expected_P(P: pd.Series, l:float = 0.8, w:int = 15) -> pd.Series:
+    return pd.Series([_expected_P(P[max(0, i-w+1):i+1], l) for i in range(len(P))])
+
+
+if __name__ == '__main__':
+    print(_expected_P([2,1,1,1,1,1,1], 0.8))
+
+    print(len(expected_P([1,2,3,4,5,6,7,8,9,10], 0.8, 5)))
+    expected_P([1,2,3,4,5,6,7,8,9], 0.2, 5)
+
