@@ -17,10 +17,19 @@ def select_match_norm(data: pd.DataFrame, player1: str, player2: str) -> [pd.Dat
     
     eg1 = data[(data["player1"] == player1) & (data["player2"] == player2)]
     eg1['elapsed_time'] = pd.to_datetime(eg1['elapsed_time'], format='%H:%M:%S')
+    
     eg1['p1_win'] = eg1['point_victor'] == 1
     eg1['p2_win'] = eg1['point_victor'] == 2
     eg1['p2_game_win'] = eg1['game_victor'] == 2
     eg1['p1_game_win'] = eg1['game_victor'] == 1
+
+    eg1['speed_mph'] = eg1['speed_mph'].fillna(0)
+    eg1['p1_ser'] = eg1['server'] == 1
+    eg1['p2_ser'] = eg1['server'] == 2
+    eg1['p1_ser_sp'] = eg1['speed_mph'] * eg1['p1_ser']
+    eg1['p2_ser_sp'] = eg1['speed_mph'] * eg1['p2_ser']
+
+    eg1['rally_count'] -= 2*eg1['rally_count']*eg1['p2_win']
 
     return eg1.sort_values(by='elapsed_time').set_index('elapsed_time')
 
