@@ -13,7 +13,8 @@ def select_match(data: pd.DataFrame, player1: str, player2: str) -> [pd.DataFram
 
     return eg1, win_series
 
-def select_match_norm(data: pd.DataFrame, player1: str, player2: str) -> [pd.DataFrame, pd.DataFrame]:
+
+def select_match_norm(data: pd.DataFrame, player1: str, player2: str) -> pd.DataFrame:
     
     eg1 = data[(data["player1"] == player1) & (data["player2"] == player2)]
     eg1['elapsed_time'] = pd.to_datetime(eg1['elapsed_time'], format='%H:%M:%S')
