@@ -4,7 +4,7 @@ import pandas as pd
 def draw_range(new_set: list[pd.Timestamp]):
     for i in range(len(new_set)):
         if i%2==0 and i+1<len(new_set):
-            plt.axvspan(new_set[i], new_set[i+1], color='orange', alpha=0.3, label=f'Interval {i}')
+            plt.axvspan(new_set[i], new_set[i+1], color='orange', alpha=0.3)
 
 
 def set_label(title, xlabel, ylabel):
