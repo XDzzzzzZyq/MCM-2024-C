@@ -157,7 +157,7 @@ class ModelUnit():
         vs.draw_range(self.set_range)
         vs.set_label(r"Current Winning Rate", r"Duration $t$", r"Winning Rate  $P_{k,t}$")
 
-    def train(self, inputs: dict[str, list[str]]):
+    def train(self, inputs: dict[str, list[str]], ratio:float=1.0):
         self.model1 = LinearRegression()
         self.model2 = LinearRegression()
         self.inputs = inputs
@@ -165,27 +165,29 @@ class ModelUnit():
         inp1 = self.inputs["p1"]
         inp2 = self.inputs["p2"]
 
+        r = int(ratio*len(self.data))
+
         x_torque1 = self.data[inp1].replace([np.inf, -np.inf, np.nan], 0).values
         y_torque1 = self.T1.shift(0).replace([np.inf, -np.inf, np.nan], 0).values
         # Fit the model to the data
-        self.model1.fit(x_torque1, y_torque1)
+        self.model1.fit(x_torque1[:r], y_torque1[:r])
         self.result1 = pd.DataFrame([inp1, self.model1.coef_]).T.set_index(0)
 
 
         x_torque2 = self.data[inp2].replace([np.inf, -np.inf, np.nan], 0).values
         y_torque2 = self.T2.shift(0).replace([np.inf, -np.inf, np.nan], 0).values
         # Fit the model to the data
-        self.model2.fit(x_torque2, y_torque2)
+        self.model2.fit(x_torque2[:r], y_torque2[:r])
         self.result2 = pd.DataFrame([inp2, self.model2.coef_]).T.set_index(0)
 
         return self.result1, self.result2
 
-    def show_params(self, sort=False):
+    def show_params(self, sort=False, pl:int = 1):
 
         if sort:
-            result = self.result1.sort_values(by=1, ascending=False)
+            result = (self.result1 if pl is 1 else self.result2).sort_values(by=1, ascending=False)
         else:
-            result = self.result1
+            result = (self.result1 if pl is 1 else self.result2)
 
         plt.figure(figsize=(15, 6))
         plt.bar(result.index, result[1])
@@ -258,22 +260,40 @@ class ModelUnit():
     def compare_constructed(self):
         plt.figure(figsize=(15, 6))
         # plt.plot(compare["p1_win"], label="calculated mumentum")
-        plt.plot(self.compare["constructed 2"], label=self.p2)
+        #plt.plot(self.compare["constructed 2"], label=self.p2)
         plt.plot(self.compare["constructed 1"], label=self.p1)
-        plt.plot(self.compare["sum"], label="Total Momentum")
+        #plt.plot(self.compare["sum"], label="Total Momentum")
+        #plt.plot(self.data["p1_unf_err"], label="Unforced Error")
+        plt.plot(self.data["speed_mph"], label="Serve Speed")
+
+        #self.compare["a"] = self.predictions1*self.Dt
+        #plt.plot(self.compare["a"], label="DL")
 
         plt.scatter(x=self.p2_gwin_time, y=self.compare["constructed 2"][self.p2_gwin_time])
         plt.scatter(x=self.p1_gwin_time, y=self.compare["constructed 1"][self.p1_gwin_time])
 
         vs.draw_range(self.set_range)
         plt.legend()
-        vs.set_label(r"Momentum Comparision", r"Duration $t$", r"Momentum  $L_{k,t}$")
+        vs.set_label(r"Indicator Analysis", r"Duration $t$", r"Momentum  $L_{k,t}$")
 
     def corr(self):
 
         corr = self.compare[["constructed 1", "constructed 2"]]
         corr["winning rate 1"] = self.data[f"p1_win"].shift(1).fillna(0)
         corr["winning rate 2"] = self.data[f"p2_win"].shift(1).fillna(0)
+
+        corr_matrix = corr.corr()
+        plt.figure(figsize=(7, 6))
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
+        plt.title('Correlation Matrix')
+
+    def corr2(self):
+
+        corr = self.compare[["constructed 1", "constructed 2"]]
+        corr["winning rate 1"] = self.data[f"p1_win"]
+        corr["winning rate 2"] = self.data[f"p2_win"]
+        corr["performance"] = self.compare['E/E']
+
 
         corr_matrix = corr.corr()
         plt.figure(figsize=(7, 6))
