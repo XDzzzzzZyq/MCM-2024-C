@@ -4,6 +4,7 @@ from utils import visualize as vs
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+sns.set_style("darkgrid")
 import pandas as pd
 
 from scipy.stats import gamma
@@ -85,9 +86,12 @@ class ModelUnit():
         self.filter_tar = None
         self.set_range = db.get_set_range(self.data)
 
+        self.p1_gwin_time = self.data[self.data['p1_game_win']].index
+        self.p2_gwin_time = self.data[self.data['p2_game_win']].index
+
         warnings.resetwarnings()
 
-        self.predictions = None
+        self.predictions1 = self.predictions2 = None
 
     def preprocess(self):
         self.data = label_encoder(self.data)
@@ -153,28 +157,35 @@ class ModelUnit():
         vs.draw_range(self.set_range)
         vs.set_label(r"Current Winning Rate", r"Duration $t$", r"Winning Rate  $P_{k,t}$")
 
-    def train(self, inputs:list[str]):
-        self.model = LinearRegression()
+    def train(self, inputs: dict[str, list[str]]):
+        self.model1 = LinearRegression()
+        self.model2 = LinearRegression()
         self.inputs = inputs
 
-        x_torque = self.data[inputs].replace([np.inf, -np.inf, np.nan], 0).values
-        y_torque = self.T1.replace([np.inf, -np.inf, np.nan], 0).values
+        inp1 = self.inputs["p1"]
+        inp2 = self.inputs["p2"]
+
+        x_torque1 = self.data[inp1].replace([np.inf, -np.inf, np.nan], 0).values
+        y_torque1 = self.T1.shift(0).replace([np.inf, -np.inf, np.nan], 0).values
         # Fit the model to the data
-        self.model.fit(x_torque, y_torque)
+        self.model1.fit(x_torque1, y_torque1)
+        self.result1 = pd.DataFrame([inp1, self.model1.coef_]).T.set_index(0)
 
-        # Print the coefficients (slope and intercept)
-        print("Slope (Coefficient):", self.model.coef_)
-        print("Intercept:", self.model.intercept_)
 
-        self.result = pd.DataFrame([inputs, self.model.coef_]).T.set_index(0)
-        return self.result
+        x_torque2 = self.data[inp2].replace([np.inf, -np.inf, np.nan], 0).values
+        y_torque2 = self.T2.shift(0).replace([np.inf, -np.inf, np.nan], 0).values
+        # Fit the model to the data
+        self.model2.fit(x_torque2, y_torque2)
+        self.result2 = pd.DataFrame([inp2, self.model2.coef_]).T.set_index(0)
+
+        return self.result1, self.result2
 
     def show_params(self, sort=False):
 
         if sort:
-            result = self.result.sort_values(by=1, ascending=False)
+            result = self.result1.sort_values(by=1, ascending=False)
         else:
-            result = self.result
+            result = self.result1
 
         plt.figure(figsize=(15, 6))
         plt.bar(result.index, result[1])
@@ -183,25 +194,63 @@ class ModelUnit():
 
     def predict(self):
 
-        x_torque = self.data[self.inputs].replace([np.inf, -np.inf, np.nan], [-10,10,0]).values
-        # Make predictions using the model
-        self.predictions = self.model.predict(x_torque)
+        inp1 = self.inputs["p1"] + self.inputs["gen"]
+        inp2 = self.inputs["p2"] + self.inputs["gen"]
 
-        return self.predictions
+        x_torque1 = self.data[inp1].replace([np.inf, -np.inf, np.nan], [-10,10,0]).values
+        x_torque2 = self.data[inp2].replace([np.inf, -np.inf, np.nan], [-10,10,0]).values
+        # Make predictions using the model
+        self.predictions1 = self.model1.predict(x_torque1)
+        self.predictions2 = self.model2.predict(x_torque2)
+
+        return self.predictions1, self.predictions2
 
     def construct_momentum(self):
-        if self.predictions is None:
+        if self.predictions1 is None:
             self.predict()
 
-        self.L1c = np.cumsum(self.predictions * self.Dt)
+        self.L1c = np.cumsum(self.predictions1 * self.Dt)
+        self.L2c = np.cumsum(self.predictions2 * self.Dt)
 
-        compare = pd.DataFrame(self.L1)
-        compare["constructed momentum"] = self.L1c
+        self.compare = pd.DataFrame(self.L1)
+        self.compare["constructed 1"] = self.L1c
+        self.compare["constructed 2"] = self.L2c
+        self.compare["sum"] = self.L2c + self.L1c
+
+    def show_constructed(self, p:int):
+        if p not in [1,2]:
+            pass
 
         plt.figure(figsize=(15, 6))
-        plt.plot(compare["p1_win"], label="calculated mumentum")
-        plt.plot(compare["constructed momentum"], label="constructed mumentum")
+        plt.plot(self.data[f"p{p}_win"], label="calculated mumentum")
+        plt.plot(self.compare[f"constructed {p}"], label="constructed mumentum")
 
         vs.draw_range(self.set_range)
         plt.legend()
         vs.set_label(r"Momentum Construction", r"Duration $t$", r"Momentum  $L_{k,t}$")
+
+    def compare_constructed(self):
+        plt.figure(figsize=(6, 6))
+        # plt.plot(compare["p1_win"], label="calculated mumentum")
+        plt.plot(self.compare["constructed 2"], label=self.p2)
+        plt.plot(self.compare["constructed 1"], label=self.p1)
+        plt.plot(self.compare["sum"], label="Total Momentum")
+
+        plt.scatter(x=self.p2_gwin_time, y=self.compare["constructed 2"][self.p2_gwin_time])
+        plt.scatter(x=self.p1_gwin_time, y=self.compare["constructed 1"][self.p1_gwin_time])
+
+        vs.draw_range(self.set_range)
+        plt.legend()
+        vs.set_label(r"Momentum Comparision", r"Duration $t$", r"Momentum  $L_{k,t}$")
+        plt.show()
+
+    def corr(self):
+
+        corr = self.compare[["constructed 1", "constructed 2"]]
+        corr["winning rate 1"] = self.data[f"p1_win"].shift(1).fillna(0)
+        corr["winning rate 2"] = self.data[f"p2_win"].shift(1).fillna(0)
+
+        corr_matrix = corr.corr()
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
+        plt.title('Correlation Matrix')
