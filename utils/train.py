@@ -268,7 +268,6 @@ class ModelUnit():
         vs.draw_range(self.set_range)
         plt.legend()
         vs.set_label(r"Momentum Comparision", r"Duration $t$", r"Momentum  $L_{k,t}$")
-        plt.show()
 
     def corr(self):
 
@@ -278,5 +277,5 @@ class ModelUnit():
 
         corr_matrix = corr.corr()
         plt.figure(figsize=(7, 6))
-        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1, label=)
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
         plt.title('Correlation Matrix')
