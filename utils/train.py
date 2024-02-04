@@ -278,5 +278,5 @@ class ModelUnit():
 
         corr_matrix = corr.corr()
         plt.figure(figsize=(7, 6))
-        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1, label=)
         plt.title('Correlation Matrix')
