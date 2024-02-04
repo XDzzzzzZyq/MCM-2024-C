@@ -131,11 +131,11 @@ class ModelUnit():
         plt.legend()
 
     def calc_torque(self, inertia: pd.DataFrame):
-        I1 = inertia[self.p1]
-        I2 = inertia[self.p2]
+        self.I1 = inertia[self.p1]
+        self.I2 = inertia[self.p2]
 
-        w1, w2 = db.get_velocity(self.data['p1_win'], I1, I2)
-        self.L1, self.L2 = I1 * w1, I2 * w2
+        w1, w2 = db.get_velocity(self.data['p1_win'], self.I1, self.I2)
+        self.L1, self.L2 = self.I1 * w1, self.I2 * w2
         DL1, DL2 = self.L1.diff().fillna(0), self.L2.diff().fillna(0)
         Dt = DL1.index.diff().fillna(pd.to_timedelta("00:01:00"))
         # Dt = db.to_minute(Dt)
@@ -216,6 +216,32 @@ class ModelUnit():
         self.compare["constructed 1"] = self.L1c
         self.compare["constructed 2"] = self.L2c
         self.compare["sum"] = self.L2c + self.L1c
+
+    def construct_energy(self):
+        E1c = self.L1c ** 2 / self.I1 / 2
+        E2c = self.L2c ** 2 / self.I2 / 2
+
+        self.compare['E1c'] = E1c
+        self.compare['E2c'] = E2c
+        self.compare['E/E'] = E1c / E2c
+        return
+        plt.figure(figsize=(15, 6))
+        plt.plot(self.compare['E2c'], label="player 2")
+        plt.plot(self.compare['E1c'], label="player 1")
+
+        vs.draw_range(self.set_range)
+        plt.legend()
+        vs.set_label(r"Performance Comparision", r"Duration $t$", r"Energy  $E_{k,t}$")
+        vs.set_xaxis()
+
+    def compare_performance(self):
+        plt.figure(figsize=(15, 6))
+        plt.plot(self.compare['E/E'][self.compare['E/E']<5], label=r"performance coefficient $p$")
+        plt.axhline(y=1, color='red', linestyle='--', label=r'$p=1$')
+        vs.draw_range(self.set_range)
+        plt.legend()
+        vs.set_label(r"Performance Coefficient $p$", r"Duration $t$", r"$p_{k,t}$")
+        vs.set_xaxis()
 
     def show_constructed(self, p:int):
         if p not in [1,2]:
