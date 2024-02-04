@@ -230,7 +230,7 @@ class ModelUnit():
         vs.set_label(r"Momentum Construction", r"Duration $t$", r"Momentum  $L_{k,t}$")
 
     def compare_constructed(self):
-        plt.figure(figsize=(6, 6))
+        plt.figure(figsize=(15, 6))
         # plt.plot(compare["p1_win"], label="calculated mumentum")
         plt.plot(self.compare["constructed 2"], label=self.p2)
         plt.plot(self.compare["constructed 1"], label=self.p1)
@@ -251,6 +251,6 @@ class ModelUnit():
         corr["winning rate 2"] = self.data[f"p2_win"].shift(1).fillna(0)
 
         corr_matrix = corr.corr()
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(6, 6))
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
         plt.title('Correlation Matrix')
