@@ -16,5 +16,5 @@ def set_label(title, xlabel, ylabel):
 def set_xaxis():
     plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%H:%M:%S'))
 
-def save(name):
-    plt.savefig(f'figs/{name}.eps', format='eps', bbox_inches='tight')
+def save(name, bbox='tight'):
+    plt.savefig(f'figs/{name}.eps', format='eps', bbox_inches=bbox)
