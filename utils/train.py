@@ -251,6 +251,6 @@ class ModelUnit():
         corr["winning rate 2"] = self.data[f"p2_win"].shift(1).fillna(0)
 
         corr_matrix = corr.corr()
-        plt.figure(figsize=(6, 6))
+        plt.figure(figsize=(7, 6))
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
         plt.title('Correlation Matrix')
