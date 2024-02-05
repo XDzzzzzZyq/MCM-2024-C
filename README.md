@@ -1,2 +1,4 @@
-# MCM-2023
- MCM-2023 Problem C
+### MCM-2024
+MCM-2024 Problem C
+
+# Psychological Angular Momentum Model (PAMM)
