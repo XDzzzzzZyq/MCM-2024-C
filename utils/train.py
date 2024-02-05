@@ -226,15 +226,6 @@ class ModelUnit():
         self.compare['E1c'] = E1c
         self.compare['E2c'] = E2c
         self.compare['E/E'] = E1c / E2c
-        return
-        plt.figure(figsize=(15, 6))
-        plt.plot(self.compare['E2c'], label="player 2")
-        plt.plot(self.compare['E1c'], label="player 1")
-
-        vs.draw_range(self.set_range)
-        plt.legend()
-        vs.set_label(r"Performance Comparision", r"Duration $t$", r"Energy  $E_{k,t}$")
-        vs.set_xaxis()
 
     def compare_performance(self):
         plt.figure(figsize=(15, 6))
@@ -315,5 +306,28 @@ class ModelUnit():
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
         plt.title('Correlation Matrix')
 
-
     def summary(self):
+        fig, (ax1, ax2) = plt.subplots(2, 1, sharex="all", figsize=(15, 12))
+
+        ax1.plot(self.compare["constructed 2"], label=self.p2)
+        ax1.plot(self.compare["constructed 1"], label=self.p1)
+        ax1.plot(self.compare["sum"], label="Total Momentum")
+        # plt.plot(self.data["p1_unf_err"], label="Unforced Error")
+        # plt.plot(self.data["speed_mph"], label="Serve Speed")
+
+        ax1.scatter(x=self.p2_gwin_time, y=self.compare["constructed 2"][self.p2_gwin_time])
+        ax1.scatter(x=self.p1_gwin_time, y=self.compare["constructed 1"][self.p1_gwin_time])
+
+        vs.draw_range(self.set_range, ax1)
+        ax1.legend()
+        vs.set_label(r"Momentum Comparison", r"Duration $t$", r"Momentum  $L_{k,t}$", ax1)
+        ax1.set_xlabel(None)
+
+        ax2.plot(self.compare['E/E'][self.compare['E/E'] < 5], label=r"performance coefficient $p$")
+        ax2.axhline(y=1, color='red', linestyle='--', label=r'$p=1$')
+        vs.draw_range(self.set_range, ax2)
+        ax2.legend()
+        vs.set_label(r"Performance Coefficient $p$", r"Duration $t$", r"$p_{k,t}$", ax2)
+        vs.set_xaxis()
+
+        #fig.suptitle('Momentum Comparison', fontsize=20)
