@@ -128,7 +128,7 @@ class ModelUnit():
         plt.plot(self.data[self.filter_tar], label=self.filter_tar)
         vs.set_label(r"Normalized Torque Components", r"Duration $t$", r"Torque  $\tau_i$")
 
-        plt.legend()
+        vs.set_caption()
 
     def calc_torque(self, inertia: pd.DataFrame):
         self.I1 = inertia[self.p1]
@@ -155,7 +155,7 @@ class ModelUnit():
 
         self.data['p1_win'].plot()
         vs.draw_range(self.set_range)
-        vs.set_label(r"Current Winning Rate", r"Duration $t$", r"Winning Rate  $P_{k,t}$")
+        vs.set_label(r"Current Winning Rate", r"Duration $t$", r"Winning Rate  $P_{k}(t)$")
 
     def train(self, inputs: dict[str, list[str]], ratio:float=1.0):
         self.model1 = LinearRegression()
@@ -238,9 +238,10 @@ class ModelUnit():
         plt.plot(self.compare['E/E'][self.compare['E/E']<5], label=r"performance coefficient $p$")
         plt.axhline(y=1, color='red', linestyle='--', label=r'$p=1$')
         vs.draw_range(self.set_range)
-        plt.legend()
-        vs.set_label(r"Performance Coefficient $p$", r"Duration $t$", r"$p_{k,t}$")
+        vs.set_caption()
+        vs.set_label(r"Performance Coefficient $p$", r"Duration $t$", r"$p_{k}(t)$")
         vs.set_xaxis()
+        vs.set_caption(True, False, True)
 
     def show_constructed(self, p:int):
         if p not in [1,2]:
@@ -251,8 +252,8 @@ class ModelUnit():
         plt.plot(self.compare[f"constructed {p}"], label="constructed mumentum")
 
         vs.draw_range(self.set_range)
-        plt.legend()
-        vs.set_label(r"Momentum Construction", r"Duration $t$", r"Momentum  $L_{k,t}$")
+        vs.set_caption()
+        vs.set_label(r"Momentum Construction", r"Duration $t$", r"Momentum  $L_{k}(t)$")
 
     def compare_constructed(self):
         plt.figure(figsize=(15, 6))
@@ -267,8 +268,8 @@ class ModelUnit():
         plt.scatter(x=self.p1_gwin_time, y=self.compare["constructed 1"][self.p1_gwin_time])
 
         vs.draw_range(self.set_range)
-        plt.legend()
-        vs.set_label(r"Momentum Comparison", r"Duration $t$", r"Momentum  $L_{k,t}$")
+        vs.set_caption()
+        vs.set_label(r"Momentum Comparison", r"Duration $t$", r"Momentum  $L_{k}(t)$")
 
     def compare_migrate(self, mig:np.ndarray):
         mig = np.cumsum(mig * self.Dt)
@@ -282,8 +283,8 @@ class ModelUnit():
         # plt.plot(self.data["speed_mph"], label="Serve Speed")
 
         vs.draw_range(self.set_range)
-        plt.legend()
-        vs.set_label(r"Model Migration", r"Duration $t$", r"Momentum  $L_{k,t}$")
+        vs.set_caption()
+        vs.set_label(r"Model Migration", r"Duration $t$", r"Momentum  $L_{k}(t)$")
         vs.set_xaxis()
 
     def compare_indicator(self, name:str, label:str):
@@ -299,8 +300,9 @@ class ModelUnit():
         plt.plot(self.data["p1_unf_err"], label="Unforced Error")
         plt.plot(self.data[name], label=label)
         vs.draw_range(self.set_range)
-        plt.legend()
-        vs.set_label(r"Indicator Analysis", r"Duration $t$", r"Momentum (components)  $L_{k,t}$")
+        vs.set_caption()
+        vs.set_caption(True, False, True)
+        vs.set_label(r"Indicator Analysis", r"Duration $t$", r"Momentum (components)  $L_{k}(t)$")
 
 
 
@@ -313,7 +315,7 @@ class ModelUnit():
         corr_matrix = corr.corr()
         plt.figure(figsize=(7, 6))
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
-        plt.title('Correlation Matrix')
+        plt.title('Correlation Matrix', fontsize = 20)
 
     def corr2(self):
 
@@ -341,15 +343,15 @@ class ModelUnit():
         ax1.scatter(x=self.p1_gwin_time, y=self.compare["constructed 1"][self.p1_gwin_time])
 
         vs.draw_range(self.set_range, ax1)
-        ax1.legend()
-        vs.set_label(r"Momentum Comparison", r"Duration $t$", r"Momentum  $L_{k,t}$", ax1)
+        vs.set_caption(True, True, True, ax1)
+        vs.set_label(r"Momentum Comparison", r"Duration $t$", r"Momentum  $L_{k}(t)$", ax1)
         ax1.set_xlabel(None)
 
         ax2.plot(self.compare['E/E'][self.compare['E/E'] < 5], label=r"performance coefficient $p$")
         ax2.axhline(y=1, color='red', linestyle='--', label=r'$p=1$')
         vs.draw_range(self.set_range, ax2)
-        ax2.legend()
-        vs.set_label(r"Performance Coefficient $p$", r"Duration $t$", r"$p_{k,t}$", ax2)
+        vs.set_caption(True, False, True, ax2)
+        vs.set_label(r"Performance Coefficient $p$", r"Duration $t$", r"$p_{k}(t)$", ax2)
         vs.set_xaxis()
 
         #fig.suptitle('Momentum Comparison', fontsize=20)
