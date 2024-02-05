@@ -10,13 +10,13 @@ def draw_range(new_set: list[pd.Timestamp], axis: plt.axis = None):
 
 def set_label(title, xlabel, ylabel, axis: plt.axis = None):
     if axis is None:
-        plt.title(title, fontname='Times New Roman', fontsize=25)
-        plt.xlabel(xlabel, fontname='Times New Roman', fontsize=20)
-        plt.ylabel(ylabel, fontname='Times New Roman', fontsize=20)
+        plt.title(title, fontsize=25)
+        plt.xlabel(xlabel, fontsize=20)
+        plt.ylabel(ylabel, fontsize=20)
     else:
-        axis.set_title(title, fontname='Times New Roman', fontsize=20)
-        axis.set_xlabel(xlabel, fontname='Times New Roman', fontsize=20)
-        axis.set_ylabel(ylabel, fontname='Times New Roman', fontsize=20)
+        axis.set_title(title, fontsize=20)
+        axis.set_xlabel(xlabel, fontsize=20)
+        axis.set_ylabel(ylabel, fontsize=20)
 
 def set_caption(r:bool = False, dot=False, orig=True, axis = None):
 

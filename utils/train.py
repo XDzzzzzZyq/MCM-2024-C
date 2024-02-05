@@ -225,17 +225,42 @@ class ModelUnit():
         self.compare["constructed 2"] = self.L2c
         self.compare["sum"] = self.L2c + self.L1c
 
+    @classmethod
+    def _cons_ener(cls, L1c, L2c, I1, I2, Off1 = 0, Off2 = 0):
+        E1c = (L1c + Off1) ** 2 / I1 / 2
+        E2c = (L2c + Off2) ** 2 / I2 / 2
+        return E1c, E2c
     def construct_energy(self):
-        E1c = self.L1c ** 2 / self.I1 / 2
-        E2c = self.L2c ** 2 / self.I2 / 2
+        E1c, E2c = ModelUnit._cons_ener(self.L1c, self.L2c, self.I1, self.I2)
 
         self.compare['E1c'] = E1c
         self.compare['E2c'] = E2c
         self.compare['E/E'] = E1c / E2c
 
+    stab = [[0, 0], [0.5, 0.5], [0.8, 0.2], [0.2, 0.8]]
+    def construct_energy_stab(self):
+
+        for idx, stb in enumerate(ModelUnit.stab):
+            E1c, E2c = ModelUnit._cons_ener(self.L1c, self.L2c, self.I1, self.I2, stb[0], stb[1])
+
+            self.compare[f'E/E {idx}'] = E1c / E2c
+
+
     def compare_performance(self):
         plt.figure(figsize=(15, 6))
         plt.plot(self.compare['E/E'][self.compare['E/E']<5], label=r"performance coefficient $p$")
+        plt.axhline(y=1, color='red', linestyle='--', label=r'$p=1$')
+        vs.draw_range(self.set_range)
+        vs.set_caption()
+        vs.set_label(r"Performance Coefficient $p$", r"Duration $t$", r"$p_{k}(t)$")
+        vs.set_xaxis()
+        vs.set_caption(True, False, True)
+
+    def compare_performance_stab(self):
+        plt.figure(figsize=(15, 6))
+        stab = [[0,0], [0.5,0.5], [1,0], [0,1]]
+        for idx, stb in enumerate(ModelUnit.stab):
+            plt.plot(self.compare[f'E/E {idx}'][self.compare[f'E/E {idx}']<5], label=fr"$L_1(0) = {stb[0]}, L_2(0) = {stb[1]}$")
         plt.axhline(y=1, color='red', linestyle='--', label=r'$p=1$')
         vs.draw_range(self.set_range)
         vs.set_caption()
