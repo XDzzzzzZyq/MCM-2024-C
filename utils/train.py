@@ -205,7 +205,13 @@ class ModelUnit():
         self.predictions1 = self.model1.predict(x_torque1)
         self.predictions2 = self.model2.predict(x_torque2)
 
-        return self.predictions1, self.predictions2
+        return x_torque1, x_torque2, self.predictions1, self.predictions2
+
+    def predict_ex(self, x_torque1, x_torque2):
+        predictions1 = self.model1.predict(x_torque1)
+        predictions2 = self.model2.predict(x_torque2)
+
+        return predictions1, predictions2
 
     def construct_momentum(self):
         if self.predictions1 is None:
@@ -263,6 +269,22 @@ class ModelUnit():
         vs.draw_range(self.set_range)
         plt.legend()
         vs.set_label(r"Momentum Comparison", r"Duration $t$", r"Momentum  $L_{k,t}$")
+
+    def compare_migrate(self, mig:np.ndarray):
+        mig = np.cumsum(mig * self.Dt)
+        self.compare["mig 2"] = mig
+
+        plt.figure(figsize=(15, 6))
+        # plt.plot(compare["p1_win"], label="calculated mumentum")
+        plt.plot(self.compare["mig 2"], label=self.p1+" (Mig)")
+        plt.plot(self.compare["constructed 1"], label=self.p1)
+        # plt.plot(self.data["p1_unf_err"], label="Unforced Error")
+        # plt.plot(self.data["speed_mph"], label="Serve Speed")
+
+        vs.draw_range(self.set_range)
+        plt.legend()
+        vs.set_label(r"Model Migration", r"Duration $t$", r"Momentum  $L_{k,t}$")
+        vs.set_xaxis()
 
     def compare_indicator(self, name:str, label:str):
         plt.figure(figsize=(15, 6))
