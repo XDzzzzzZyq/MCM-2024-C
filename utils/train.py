@@ -260,21 +260,36 @@ class ModelUnit():
     def compare_constructed(self):
         plt.figure(figsize=(15, 6))
         # plt.plot(compare["p1_win"], label="calculated mumentum")
-        #plt.plot(self.compare["constructed 2"], label=self.p2)
+        plt.plot(self.compare["constructed 2"], label=self.p2)
         plt.plot(self.compare["constructed 1"], label=self.p1)
-        #plt.plot(self.compare["sum"], label="Total Momentum")
+        plt.plot(self.compare["sum"], label="Total Momentum")
         #plt.plot(self.data["p1_unf_err"], label="Unforced Error")
-        plt.plot(self.data["speed_mph"], label="Serve Speed")
-
-        #self.compare["a"] = self.predictions1*self.Dt
-        #plt.plot(self.compare["a"], label="DL")
+        #plt.plot(self.data["speed_mph"], label="Serve Speed")
 
         plt.scatter(x=self.p2_gwin_time, y=self.compare["constructed 2"][self.p2_gwin_time])
         plt.scatter(x=self.p1_gwin_time, y=self.compare["constructed 1"][self.p1_gwin_time])
 
         vs.draw_range(self.set_range)
         plt.legend()
-        vs.set_label(r"Indicator Analysis", r"Duration $t$", r"Momentum  $L_{k,t}$")
+        vs.set_label(r"Momentum Comparison", r"Duration $t$", r"Momentum  $L_{k,t}$")
+
+    def compare_indicator(self, name:str, label:str):
+        plt.figure(figsize=(15, 6))
+        # plt.plot(compare["p1_win"], label="calculated mumentum")
+        #plt.plot(self.compare["constructed 2"], label=self.p2)
+
+        #plt.plot(self.compare["sum"], label="Total Momentum")
+        # plt.plot(self.data["speed_mph"], label="Serve Speed")
+        plt.plot(self.compare["constructed 1"], label=self.p1)
+        #plt.scatter(x=self.p2_gwin_time, y=self.compare["constructed 2"][self.p2_gwin_time])
+        plt.scatter(x=self.p1_gwin_time, y=self.compare["constructed 1"][self.p1_gwin_time])
+        plt.plot(self.data["p1_unf_err"], label="Unforced Error")
+        plt.plot(self.data[name], label=label)
+        vs.draw_range(self.set_range)
+        plt.legend()
+        vs.set_label(r"Indicator Analysis", r"Duration $t$", r"Momentum (components)  $L_{k,t}$")
+
+
 
     def corr(self):
 
@@ -299,3 +314,6 @@ class ModelUnit():
         plt.figure(figsize=(7, 6))
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
         plt.title('Correlation Matrix')
+
+
+    def summary(self):
